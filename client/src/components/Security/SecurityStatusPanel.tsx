@@ -63,7 +63,7 @@ const SecurityStatusPanel = () => {
                             {item.type === 'boolean' && (item.value ? t('enabled') : t('disabled'))}
                             {item.type === 'minutes' && `${item.value} ${t('minutes')}`}
                             {item.type === 'number' && item.value}
-                            {item.type === 'count' && (item.value > 0 ? `${item.value} ${t('items')}` : t('all_allowed'))}
+                            {item.type === 'count' && (typeof item.value === 'number' && item.value > 0 ? `${item.value} ${t('items')}` : t('all_allowed'))}
                         </span>
                     </div>
                 ))}
