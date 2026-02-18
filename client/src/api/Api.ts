@@ -705,6 +705,42 @@ class Api {
 
         return this.makeRequest(path, method);
     }
+
+    // Security
+    SECURITY_STATUS = { path: 'security/status', method: 'GET' };
+
+    SECURITY_SCORE = { path: 'security/score', method: 'GET' };
+
+    TOTP_ENABLE = { path: 'security/totp/enable', method: 'POST' };
+
+    TOTP_DISABLE = { path: 'security/totp/disable', method: 'POST' };
+
+    TOTP_QRCODE = { path: 'security/totp/qrcode', method: 'GET' };
+
+    getSecurityStatus() {
+        const { path, method } = this.SECURITY_STATUS;
+        return this.makeRequest(path, method);
+    }
+
+    getSecurityScore() {
+        const { path, method } = this.SECURITY_SCORE;
+        return this.makeRequest(path, method);
+    }
+
+    enableTOTP(secret: string, code: string) {
+        const { path, method } = this.TOTP_ENABLE;
+        return this.makeRequest(path, method, { data: { secret, code } });
+    }
+
+    disableTOTP() {
+        const { path, method } = this.TOTP_DISABLE;
+        return this.makeRequest(path, method);
+    }
+
+    getTOTPQRCode() {
+        const { path, method } = this.TOTP_QRCODE;
+        return this.makeRequest(path, method);
+    }
 }
 
 const apiClient = new Api();
