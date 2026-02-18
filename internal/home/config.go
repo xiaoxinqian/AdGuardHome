@@ -169,11 +169,98 @@ type configuration struct {
 	// [configmigrate.LastSchemaVersion].
 	SchemaVersion uint `yaml:"schema_version"`
 
-	// UnsafeUseCustomUpdateIndexURL is the URL to the custom update index.
+	// UnsafeUseCustomUpdateCustomUpdateIndexURL is the URL to the custom update index.
 	//
 	// NOTE: It's only exists for testing purposes and should not be used in
 	// release.
 	UnsafeUseCustomUpdateIndexURL bool `yaml:"unsafe_use_custom_update_index_url,omitempty"`
+
+	// Security contains security-related configuration.
+	Security *securityConfig `yaml:"security"`
+
+	// Audit contains audit log configuration.
+	Audit *auditConfig `yaml:"audit"`
+
+	// Notify contains notification configuration.
+	Notify *notifyConfig `yaml:"notify"`
+}
+
+// securityConfig is the security configuration block.
+type securityConfig struct {
+	// SingleUserMode indicates that only one admin user is allowed.
+	SingleUserMode bool `yaml:"single_user_mode"`
+
+	// CustomPath is the custom admin path for hiding the login page.
+	CustomPath string `yaml:"custom_path"`
+
+	// PasswordPolicy contains password policy settings.
+	PasswordPolicy *passwordPolicyConfig `yaml:"password_policy"`
+
+	// TOTP contains TOTP settings.
+	TOTP *totpConfig `yaml:"totp"`
+
+	// Session contains session security settings.
+	Session *sessionSecurityConfig `yaml:"session"`
+
+	// Login contains login security settings.
+	Login *loginSecurityConfig `yaml:"login"`
+
+	// AllowedDNSClients is the list of IPs allowed to use DNS.
+	AllowedDNSClients []string `yaml:"allowed_dns_clients"`
+}
+
+// passwordPolicyConfig is the password policy configuration.
+type passwordPolicyConfig struct {
+	MinLength      int  `yaml:"min_length"`
+	RequireUpper   bool `yaml:"require_upper"`
+	RequireLower   bool `yaml:"require_lower"`
+	RequireDigit   bool `yaml:"require_digit"`
+	RequireSpecial bool `yaml:"require_special"`
+}
+
+// totpConfig is the TOTP configuration.
+type totpConfig struct {
+	Enabled bool   `yaml:"enabled"`
+	Secret  string `yaml:"secret"`
+	Issuer  string `yaml:"issuer"`
+}
+
+// sessionSecurityConfig is the session security configuration.
+type sessionSecurityConfig struct {
+	SingleDevice bool              `yaml:"single_device"`
+	Timeout      timeutil.Duration `yaml:"timeout"`
+}
+
+// loginSecurityConfig is the login security configuration.
+type loginSecurityConfig struct {
+	MaxAttempts   int               `yaml:"max_attempts"`
+	LockoutPeriod timeutil.Duration `yaml:"lockout_period"`
+}
+
+// auditConfig is the audit log configuration.
+type auditConfig struct {
+	Enabled       bool   `yaml:"enabled"`
+	RetentionDays int    `yaml:"retention_days"`
+	LogFile       string `yaml:"log_file"`
+	DBPath        string `yaml:"db_path"`
+}
+
+// notifyConfig is the notification configuration.
+type notifyConfig struct {
+	Enabled bool        `yaml:"enabled"`
+	SMTP    *smtpConfig `yaml:"smtp"`
+	Events  []string    `yaml:"events"`
+}
+
+// smtpConfig is the SMTP configuration.
+type smtpConfig struct {
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
+	UseTLS   bool   `yaml:"use_tls"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
+	From     string `yaml:"from"`
+	To       string `yaml:"to"`
 }
 
 // httpConfig is a block with HTTP configuration params.
