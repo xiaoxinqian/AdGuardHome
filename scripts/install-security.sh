@@ -149,7 +149,7 @@ set_admin_password() {
     echo ""
     
     while true; do
-        read -s -p "请输入管理员密码: " PASSWORD
+        read -s -p "请输入管理员密码: " PASSWORD < /dev/tty
         echo ""
         
         if ! validate_password "$PASSWORD"; then
@@ -157,7 +157,7 @@ set_admin_password() {
             continue
         fi
         
-        read -s -p "请再次输入密码: " PASSWORD_CONFIRM
+        read -s -p "请再次输入密码: " PASSWORD_CONFIRM < /dev/tty
         echo ""
         
         if [ "$PASSWORD" != "$PASSWORD_CONFIRM" ]; then
