@@ -149,15 +149,22 @@ set_admin_password() {
     echo ""
     
     while true; do
-        read -s -p "请输入管理员密码: " PASSWORD < /dev/tty
+        read -p "请输入管理员密码: " PASSWORD < /dev/tty
         echo ""
         
-        if ! validate_password "$PASSWORD"; then
-            print_error "密码不符合策略要求，请重新输入"
+        if [ -z "$PASSWORD" ]; then
+            print_error "密码不能为空"
             continue
         fi
         
-        read -s -p "请再次输入密码: " PASSWORD_CONFIRM < /dev/tty
+        if ! validate_password "$PASSWORD"; then
+            print_error "密码不符合策略要求，请重新输入"
+            echo "当前输入的密码: $PASSWORD"
+            echo "密码长度: ${#PASSWORD}"
+            continue
+        fi
+        
+        read -p "请再次输入密码: " PASSWORD_CONFIRM < /dev/tty
         echo ""
         
         if [ "$PASSWORD" != "$PASSWORD_CONFIRM" ]; then
