@@ -209,8 +209,14 @@ func TestFormatDuration(t *testing.T) {
 }
 
 func TestGenerateRandomPath(t *testing.T) {
-	path1 := GenerateRandomPath()
-	path2 := GenerateRandomPath()
+	path1, err := GenerateRandomPath()
+	if err != nil {
+		t.Fatalf("GenerateRandomPath() error = %v", err)
+	}
+	path2, err := GenerateRandomPath()
+	if err != nil {
+		t.Fatalf("GenerateRandomPath() error = %v", err)
+	}
 
 	if len(path1) != DefaultCustomPathLength {
 		t.Errorf("path length = %d, want %d", len(path1), DefaultCustomPathLength)

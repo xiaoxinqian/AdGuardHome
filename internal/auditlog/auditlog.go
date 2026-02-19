@@ -2,6 +2,8 @@ package auditlog
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"log/slog"
@@ -412,5 +414,9 @@ func (al *AuditLogger) IsEnabled() bool {
 }
 
 func generateEventID() string {
-	return fmt.Sprintf("%d", time.Now().UnixNano())
+	b := make([]byte, 8)
+	if _, err := rand.Read(b); err != nil {
+		return fmt.Sprintf("%d-%d", time.Now().UnixNano(), time.Now().Nanosecond())
+	}
+	return fmt.Sprintf("%d-%s", time.Now().Unix(), hex.EncodeToString(b))
 }

@@ -98,7 +98,7 @@ build_binary() {
     # 创建压缩包
     cd "${DIST_DIR}"
     if [ "$goos" = "windows" ]; then
-        zip -r -q "AdGuardHome_linux_${goarch}.zip" "${output_dir}"
+        zip -r -q "AdGuardHome_windows_${goarch}.zip" "${output_dir}"
     else
         tar czf "AdGuardHome_${output_dir}.tar.gz" "${output_dir}"
     fi

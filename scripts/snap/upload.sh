@@ -81,7 +81,7 @@ for arch in \
 	*)
 		echo "unexpected snapcraft upload error: ${snapcraft_output}"
 
-		return "$snapcraft_exit_code"
+		exit "$snapcraft_exit_code"
 		;;
 	esac
 done

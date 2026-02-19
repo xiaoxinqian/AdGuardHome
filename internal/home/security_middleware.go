@@ -230,15 +230,12 @@ func (sm *SecurityMiddleware) GetRateLimiter() loginRateLimiter {
 	return sm.rateLimiter
 }
 
-func GenerateRandomPath() string {
+func GenerateRandomPath() (string, error) {
 	b := make([]byte, 8)
 	if _, err := rand.Read(b); err != nil {
-		const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-		for i := range b {
-			b[i] = charset[i%len(charset)]
-		}
+		return "", fmt.Errorf("generating random bytes: %w", err)
 	}
-	return hex.EncodeToString(b)
+	return hex.EncodeToString(b), nil
 }
 
 func (sm *SecurityMiddleware) LogSecurityEvent(ctx context.Context, eventType auditlog.EventType, severity auditlog.Severity, username, ip, userAgent string, details map[string]interface{}) {

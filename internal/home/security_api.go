@@ -211,6 +211,30 @@ func (web *webAPI) handleTOTPEnable(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if req.Secret == "" {
+		aghhttp.ErrorAndLog(ctx, web.logger, r, w, http.StatusBadRequest, "secret is required")
+		return
+	}
+
+	if req.Code == "" {
+		aghhttp.ErrorAndLog(ctx, web.logger, r, w, http.StatusBadRequest, "verification code is required")
+		return
+	}
+
+	totpSvc := NewTOTPService(&TOTPServiceConfig{
+		Issuer: "AdGuardHome",
+	})
+	if err := totpSvc.SetSecret(req.Secret); err != nil {
+		aghhttp.ErrorAndLog(ctx, web.logger, r, w, http.StatusBadRequest, "invalid secret: %s", err)
+		return
+	}
+
+	valid, err := totpSvc.Validate(req.Code)
+	if err != nil || !valid {
+		aghhttp.ErrorAndLog(ctx, web.logger, r, w, http.StatusBadRequest, "invalid verification code")
+		return
+	}
+
 	config.Lock()
 	defer config.Unlock()
 

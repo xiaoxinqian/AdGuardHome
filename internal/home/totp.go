@@ -13,6 +13,7 @@ import (
 	"image/png"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/AdguardTeam/AdGuardHome/internal/crypto"
@@ -48,6 +49,7 @@ type TOTPService struct {
 	windowSize     uint
 	failedAttempts map[string]int
 	maxAttempts    int
+	mu             sync.RWMutex
 }
 
 type TOTPServiceConfig struct {
@@ -179,14 +181,20 @@ func (t *TOTPService) ValidateWithTracking(code, clientIP string) (bool, error) 
 }
 
 func (t *TOTPService) IsLocked(clientIP string) bool {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
 	return t.failedAttempts[clientIP] >= t.maxAttempts
 }
 
 func (t *TOTPService) recordFailedAttempt(clientIP string) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
 	t.failedAttempts[clientIP]++
 }
 
 func (t *TOTPService) clearFailedAttempts(clientIP string) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
 	delete(t.failedAttempts, clientIP)
 }
 
@@ -198,7 +206,14 @@ func (t *TOTPService) generateCode(timestamp int64) string {
 	mac.Write(counter)
 	hash := mac.Sum(nil)
 
+	if len(hash) < sha1.Size {
+		return ""
+	}
+
 	offset := hash[len(hash)-1] & 0x0f
+	if int(offset)+4 > len(hash) {
+		return ""
+	}
 	code := binary.BigEndian.Uint32(hash[offset:offset+4]) & 0x7fffffff
 
 	format := fmt.Sprintf("%%0%dd", t.digits)

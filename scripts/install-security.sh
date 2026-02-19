@@ -176,6 +176,7 @@ download_binary() {
     local arch=$(detect_arch)
     local download_url="${REPO_URL}/releases/download/v${VERSION}/AdGuardHome_linux_${arch}.tar.gz"
     local tmp_dir=$(mktemp -d)
+    local orig_dir=$(pwd)
     
     print_info "下载 AdGuardHome (架构: ${arch})..."
     
@@ -194,7 +195,7 @@ download_binary() {
         mv AdGuardHome/AdGuardHome "${INSTALL_DIR}/"
     fi
     
-    cd - > /dev/null
+    cd "$orig_dir"
     rm -rf "$tmp_dir"
     
     chmod +x "${INSTALL_DIR}/AdGuardHome"
@@ -308,12 +309,12 @@ EOF
 configure_firewall() {
     print_info "配置防火墙..."
     
-    if command -v ufw &> /dev/null; then
+    if command -v ufw > /dev/null 2>&1; then
         ufw allow 80/tcp
         ufw allow 53/tcp
         ufw allow 53/udp
         print_success "UFW 防火墙规则已添加"
-    elif command -v firewall-cmd &> /dev/null; then
+    elif command -v firewall-cmd > /dev/null 2>&1; then
         firewall-cmd --permanent --add-port=80/tcp
         firewall-cmd --permanent --add-port=53/tcp
         firewall-cmd --permanent --add-port=53/udp
@@ -332,7 +333,17 @@ set_password() {
     
     HASHED_PASSWORD=$(openssl passwd -6 "$PASSWORD")
     
-    sed -i "s/password: \"\"/password: \"${HASHED_PASSWORD}\"/" "${DATA_DIR}/AdGuardHome.yaml"
+    if [ -z "$HASHED_PASSWORD" ]; then
+        print_error "密码哈希生成失败"
+        exit 1
+    fi
+    
+    sed -i "s|password: \"\"|password: \"${HASHED_PASSWORD}\"|" "${DATA_DIR}/AdGuardHome.yaml"
+    
+    if ! grep -q "password: \"${HASHED_PASSWORD}\"" "${DATA_DIR}/AdGuardHome.yaml" 2>/dev/null; then
+        print_error "密码设置失败，请检查配置文件"
+        exit 1
+    fi
     
     print_success "密码已设置"
 }
