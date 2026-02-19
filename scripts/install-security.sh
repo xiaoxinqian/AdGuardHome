@@ -129,7 +129,7 @@ validate_password() {
         return 1
     fi
     
-    if ! echo "$password" | grep -q '[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]'; then
+    if ! echo "$password" | grep -q '[!@#$%^&*()_+=\[\]{}|;:,.<>?~-]'; then
         return 1
     fi
     
