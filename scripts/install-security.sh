@@ -148,14 +148,33 @@ set_admin_password() {
     echo "  - 包含特殊字符 (!@#$%^&* 等)"
     echo ""
     
+    if [ -t 0 ]; then
+        TTY_INPUT=""
+    elif [ -e /dev/tty ]; then
+        TTY_INPUT="< /dev/tty"
+    else
+        print_error "无法获取终端输入，请直接运行脚本而非通过管道"
+        print_info "请使用以下命令安装:"
+        echo "  wget -O install.sh https://raw.githubusercontent.com/xiaoxinqian/AdGuardHome/master/scripts/install-security.sh"
+        echo "  chmod +x install.sh"
+        echo "  ./install.sh"
+        exit 1
+    fi
+    
     while true; do
-        read -p "请输入管理员密码: " PASSWORD < /dev/tty
+        if [ -e /dev/tty ]; then
+            read -p "请输入管理员密码: " PASSWORD < /dev/tty
+        else
+            read -p "请输入管理员密码: " PASSWORD
+        fi
         echo ""
         
         if [ -z "$PASSWORD" ]; then
             print_error "密码不能为空"
             continue
         fi
+        
+        echo "已接收到密码输入，长度: ${#PASSWORD}"
         
         if ! validate_password "$PASSWORD"; then
             print_error "密码不符合策略要求，请重新输入"
@@ -164,7 +183,11 @@ set_admin_password() {
             continue
         fi
         
-        read -p "请再次输入密码: " PASSWORD_CONFIRM < /dev/tty
+        if [ -e /dev/tty ]; then
+            read -p "请再次输入密码: " PASSWORD_CONFIRM < /dev/tty
+        else
+            read -p "请再次输入密码: " PASSWORD_CONFIRM
+        fi
         echo ""
         
         if [ "$PASSWORD" != "$PASSWORD_CONFIRM" ]; then
